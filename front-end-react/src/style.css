@@ -1,0 +1,76 @@
+body {
+  font-family: Arial, sans-serif;
+  background-color: #f9f9f9;
+  margin: 0;
+  padding: 20px;
+}
+
+.app {
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 20px;
+}
+
+h1 {
+  margin: 0;
+}
+
+.login-box {
+  text-align: right;
+  background-color: #fff;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+}
+
+.login-box input {
+  display: block;
+  width: 150px;
+  margin-bottom: 5px;
+  padding: 4px;
+}
+
+.login-box button {
+  padding: 5px 10px;
+  margin-top: 5px;
+}
+
+.event-search {
+  margin-bottom: 20px;
+}
+
+.event-search input {
+  padding: 6px;
+  margin-right: 8px;
+}
+
+.event-search button {
+  padding: 6px 12px;
+}
+
+.event-results {
+  margin-top: 20px;
+}
+
+.event-card {
+  background: #fff;
+  padding: 15px;
+  margin-bottom: 15px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  box-shadow: 1px 1px 4px rgba(0, 0, 0, 0.05);
+}
+
+.logged-in-message {
+    margin-top: -10px;
+    margin-bottom: 20px;
+    font-style: italic;
+    text-align: right;
+  }
+  
