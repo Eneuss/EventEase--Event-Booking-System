@@ -3,13 +3,14 @@ const cors = require('cors');
 const app = express();
 app.use(express.json());
 const session = require('express-session')
+const loadConfig = require('./config');
 const UserRouter = require('./Routes/UserRoutes');
 const EventRouter = require('./Routes/EventRoutes');
 const TicketRouter = require('./Routes/TicketRoutes');
 const BookingRouter = require('./Routes/BookingRoutes');
 app.use(express.json())
 app.use(session({
-    secret: 'my_secret_',
+    secret: loadConfig().sessionSecret,
     resave: false,
     saveUninitialized: false,
     cookie: {
