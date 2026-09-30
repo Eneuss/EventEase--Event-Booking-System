@@ -1,0 +1,28 @@
+# Runs the whole app locally: docker compose up --build, then open http://localhost:8080
+name: eventease
+
+services:
+  backend:
+    build: ./backend
+    environment:
+      # Local demo setup: development mode uses a clearly marked dev session secret
+      # unless SESSION_SECRET is set (e.g. in a .env file next to this compose file).
+      NODE_ENV: development
+      SESSION_SECRET: ${SESSION_SECRET:-}
+      # nginx forwards the client IP, which the login rate limiter uses.
+      TRUST_PROXY: "1"
+    volumes:
+      # The database is created and seeded on first start and kept between restarts.
+      - db-data:/app/data
+    restart: unless-stopped
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "${EVENTEASE_PORT:-8080}:80"
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+volumes:
+  db-data:
