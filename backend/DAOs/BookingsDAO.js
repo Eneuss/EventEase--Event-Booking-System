@@ -4,59 +4,54 @@ const createResponse = require('../Utilities/createResponse');
 class BookingsDAO {
     constructor() {}
 
-    async bookEvent(req) {
+    // Book tickets atomically. The availability check and decrement are a single conditional UPDATE,
+    // and the INSERT only runs if that UPDATE changed a row. The connection is in serialized mode and
+    // all four statements are queued in the same tick, so no other request's statements can run in between.
+    async bookEvent({ eventID, ticketType, username, quantity }) {
         return new Promise((resolve, reject) => {
-            const { eventID, ticketType, username, quantity } = req.body;
-            const qty = parseInt(quantity);
-            
-            //check ticket availability
-            connection.get(
-                `SELECT availability FROM tickets WHERE eventID = ? AND ticketType = ?`,
-                [eventID, ticketType],
-                (err, ticket) => {
+            let reserved = 0;
+            let bookingId = null;
+            let failure = null;
 
-                    if (err) {
-                        return reject({ success: false, message: 'Database error while checking availability', error: err });
-                      }
-              
-                      if (!ticket) {
-                        return reject({ success: false, message: 'This ticket type does not exist for this event.' });
-                      }
-              
-                      if (!ticket.availability || ticket.availability < qty) {
-                        return reject({ success: false, message: 'This ticket type is sold out or does not have enough availability.' });
-                      }
-              
-
-                    //booking
-                    connection.run(
-                        `INSERT INTO bookings (eventID, ticketType, username, quantity) VALUES (?, ?, ?, ?)`,
-                        [eventID, ticketType, username, qty],
-                        function (err) {
-                            if (err) {
-                                return reject(createResponse(false, 'DB error while creating booking', err));
-                            }
-    
-                            //update ticket availability
-                            connection.run(
-                                `UPDATE tickets SET availability = availability - ? WHERE eventID = ? AND ticketType = ?`,
-                                [qty, eventID, ticketType],
-                                (err2) => {
-                                    if (err2) {
-                                        return reject(createResponse(false, 'Failed to update ticket availability', err2));
-                                    }
-    
-                                    resolve(
-                                        createResponse(true, 'Booking created and availability updated', {
-                                            bookingId: this.lastID
-                                        })
-                                    );
-                                }
-                            );
-                        }
-                    );
+            connection.run('BEGIN IMMEDIATE');
+            connection.run(
+                `UPDATE tickets SET availability = availability - ?
+                 WHERE eventID = ? AND ticketType = ? AND availability >= ?`,
+                [quantity, eventID, ticketType, quantity],
+                function (err) {
+                    if (err) failure = err;
+                    else reserved = this.changes;
                 }
             );
+            connection.run(
+                `INSERT INTO bookings (eventID, ticketType, username, quantity)
+                 SELECT ?, ?, ?, ? WHERE changes() = 1`,
+                [eventID, ticketType, username, quantity],
+                function (err) {
+                    if (err) failure = err;
+                    else if (this.changes === 1) bookingId = this.lastID;
+                }
+            );
+            connection.run('COMMIT', (err) => {
+                if (err || failure) {
+                    return reject(err || failure);
+                }
+                if (reserved === 1 && bookingId !== null) {
+                    return resolve({ success: true, bookingId });
+                }
+                // Nothing was reserved: find out why, for a useful error message.
+                connection.get(
+                    'SELECT availability FROM tickets WHERE eventID = ? AND ticketType = ?',
+                    [eventID, ticketType],
+                    (err2, ticket) => {
+                        if (err2) return reject(err2);
+                        if (!ticket) {
+                            return resolve({ success: false, status: 404, message: 'This ticket type does not exist for this event.' });
+                        }
+                        resolve({ success: false, status: 409, message: 'This ticket type is sold out or does not have enough availability.' });
+                    }
+                );
+            });
         });
     }
 

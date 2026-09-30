@@ -5,16 +5,10 @@ class BookingService {
         this.bookingsdao = new BookingsDAO();
     }
 
-    //book an event ticket
-    async bookEvent(req) {
-        try {
-          const result = await this.bookingsdao.bookEvent(req);
-          return result;
-        } catch (err) {
-            return err;
-        }
-      }
-      
+    // Book tickets for an event
+    async bookEvent(booking) {
+        return this.bookingsdao.bookEvent(booking);
+    }
 
     // Retrieve all bookings
     async retrieveAll() {

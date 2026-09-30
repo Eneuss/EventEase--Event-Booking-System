@@ -19,14 +19,15 @@ router.post('/ticketing', SessionAuth, async (req, res) => {
     return res.status(400).json({ success: false, message: 'Invalid booking input.' });
     }
 
-    // The booking always belongs to the logged-in user, whatever the client sends.
-    req.body.username = req.session.user;
-
     try {
-        const result = await bookingService.bookEvent(req);
-        res.json(result);
+        // The booking always belongs to the logged-in user, whatever the client sends.
+        const result = await bookingService.bookEvent({ eventID, ticketType, quantity, username: req.session.user });
+        if (!result.success) {
+            return res.status(result.status).json({ success: false, message: result.message });
+        }
+        res.json({ success: true, message: 'Booking confirmed.', bookingId: result.bookingId });
     } catch (error) {
-        res.status(500).json({ error: 'An error occurred while creating the booking.' });
+        res.status(500).json({ success: false, message: 'An error occurred while creating the booking.' });
     }
 });
 
