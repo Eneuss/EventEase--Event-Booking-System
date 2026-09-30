@@ -36,4 +36,11 @@ app.use('/ticket', TicketRouter);
 // Booking Routes
 app.use('/booking', BookingRouter);
 
+// Last-resort error handler: log and answer with a generic 500 instead of crashing.
+// eslint-disable-next-line no-unused-vars
+app.use((err, req, res, next) => {
+    console.error(err);
+    res.status(500).json({ success: false, message: 'Internal server error.' });
+});
+
 module.exports = app;

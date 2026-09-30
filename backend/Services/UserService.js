@@ -54,7 +54,8 @@ class UserService {
 
     async login(req){
         const result = await this.userdao.retrieveByUsername(req)
-        const isMatch = await verifyPassword(req.body.password ,result.result.password)
+        const user = result.result
+        const isMatch = user ? await verifyPassword(req.body.password, user.password) : false
         if(isMatch){
             req.session.user = req.body.username;
             req.session.isAuthenticated = true

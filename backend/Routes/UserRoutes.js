@@ -3,6 +3,7 @@ const router = express.Router();
 const UserService = require('../Services/UserService');
 const SessionAuth = require('../Middleware/SessionAuth');
 const path = require('path');
+const asyncHandler = require('../Utilities/asyncHandler');
 
 const userService = new UserService();
 
@@ -31,7 +32,7 @@ router.get('/getAllPage', SessionAuth, async (req, res) => {
     res.sendFile(path.join(__dirname, '..', 'Views', 'users.html'));
 });
 
-router.post("/login", async (req, res) =>{
+router.post("/login", asyncHandler(async (req, res) =>{
     const { username, password } = req.body;
 
     //input check for security measures
@@ -39,9 +40,11 @@ router.post("/login", async (req, res) =>{
     return res.status(400).json({ success: false, message: 'Invalid username or password input.' });
     }
     const result = await userService.login(req)
-    
+    if (!result.success) {
+        return res.status(401).json({ success: false, message: 'Invalid username or password.' });
+    }
     res.json(result)
-})
+}))
 
 router.post('/logout', (req, res) => {
     req.session.destroy(() => {
