@@ -1,6 +1,7 @@
 {
   "name": "eventease-backend",
   "version": "1.0.0",
+  "license": "MIT",
   "private": true,
   "description": "Express + SQLite REST API for the EventEase event booking app",
   "main": "src/server.js",
