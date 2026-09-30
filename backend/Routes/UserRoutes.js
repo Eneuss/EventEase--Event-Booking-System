@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const UserService = require('../Services/UserService');
 const SessionAuth = require('../Middleware/SessionAuth');
+const RequireAdmin = require('../Middleware/RequireAdmin');
 const path = require('path');
 const asyncHandler = require('../Utilities/asyncHandler');
 
@@ -9,16 +10,23 @@ const userService = new UserService();
 
 // Create a new user
 router.post('/signup', async (req, res) => {
+    const { username, password } = req.body;
+    if (!username || typeof username !== 'string' || !password || typeof password !== 'string') {
+        return res.status(400).json({ success: false, message: 'Username and password are required.' });
+    }
     try {
         const result = await userService.create(req);
-        res.json(result);
+        if (result.conflict) {
+            return res.status(409).json({ success: false, message: 'Username is already taken.' });
+        }
+        res.json({ success: true, username });
     } catch (error) {
         res.status(500).json({ error: 'An error occurred while creating the user.' });
     }
 });
 
 // Retrieve all users
-router.get('/getAll', SessionAuth, async (req, res) => {
+router.get('/getAll', RequireAdmin, async (req, res) => {
     try {
         const result = await userService.retrieveAll();
         res.json(result.result);

@@ -4,25 +4,6 @@ const createResponse = require('../Utilities/createResponse');
 class BookingsDAO {
     constructor() {}
 
-    // Create a new booking
-    async create(req) {
-        return new Promise((resolve, reject) => {
-            connection.run('INSERT INTO bookings (eventID, ticketType, username, quantity) VALUES (?, ?, ?, ?)', 
-            [
-                req.body.eventID,
-                req.body.ticketType,
-                req.body.username,
-                req.body.quantity
-            ], (err, result) => {
-                if (err) {
-                    reject(createResponse(false, 'DB error', err));
-                }
-                resolve(createResponse(true, 'Booking created successfully', { id: this.lastID }));
-            });
-        });
-
-    }
-
     async bookEvent(req) {
         return new Promise((resolve, reject) => {
             const { eventID, ticketType, username, quantity } = req.body;

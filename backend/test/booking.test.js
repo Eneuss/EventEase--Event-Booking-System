@@ -1,7 +1,6 @@
 const { test, after } = require('node:test');
 const assert = require('node:assert/strict');
-const request = require('supertest');
-const { useTempDatabase } = require('./helpers');
+const { useTempDatabase, loginAs } = require('./helpers');
 
 useTempDatabase();
 const app = require('../app');
@@ -9,12 +8,7 @@ const connection = require('../DatabaseConnection/SQLCon');
 
 after(() => connection.close());
 
-async function loggedInAgent(username) {
-    const agent = request.agent(app);
-    await agent.post('/user/signup').send({ username, password: 'password123', isAdmin: 0 });
-    await agent.post('/user/login').send({ username, password: 'password123' }).expect(200);
-    return agent;
-}
+const loggedInAgent = (username) => loginAs(app, connection, username);
 
 test('bookings are recorded for the session user, not the username in the body', { timeout: 2000 }, async () => {
     const dave = await loggedInAgent('dave');

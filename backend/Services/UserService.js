@@ -8,12 +8,12 @@ class UserService {
 
     // Create a new user
     async create(req) {
-        req.body.password = await hashedpassword(req.body.password)
-        const result = await this.userdao.create(req);
-        if (!result.success) {
-            return result;
+        const existing = await this.userdao.retrieveByUsername(req)
+        if (existing.result) {
+            return { success: false, conflict: true }
         }
-        return result;
+        const passwordHash = await hashedpassword(req.body.password)
+        return this.userdao.create(req.body.username, passwordHash)
     }
 
     // Retrieve all users
@@ -59,6 +59,7 @@ class UserService {
         if(isMatch){
             req.session.user = req.body.username;
             req.session.isAuthenticated = true
+            req.session.isAdmin = user.isAdmin === 1
         }
         result.success = isMatch
         return result

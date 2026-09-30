@@ -2,19 +2,10 @@ const express = require('express');
 const router = express.Router();
 const BookingService = require('../Services/BookingService');
 const SessionAuth = require('../Middleware/SessionAuth')
+const RequireAdmin = require('../Middleware/RequireAdmin')
 const path = require('path');
 
 const bookingService = new BookingService();
-
-// Create a new booking
-router.post('/create', async (req, res) => {
-    try {
-        const result = await bookingService.create(req);
-        res.json(result);
-    } catch (error) {
-        res.status(500).json({ error: 'An error occurred while creating the booking.' });
-    }
-});
 
 // Create a new booking
 router.post('/ticketing', SessionAuth, async (req, res) => {
@@ -40,7 +31,7 @@ router.post('/ticketing', SessionAuth, async (req, res) => {
 });
 
 // Retrieve all bookings
-router.get('/getAll', SessionAuth, async (req, res) => {
+router.get('/getAll', RequireAdmin, async (req, res) => {
     try {
         const result = await bookingService.retrieveAll();
         res.json(result.result);

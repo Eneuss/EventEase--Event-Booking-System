@@ -2,11 +2,12 @@ const express = require('express');
 const router = express.Router();
 const TicketService = require('../Services/TicketService');
 const path = require('path');
+const RequireAdmin = require('../Middleware/RequireAdmin');
 
 const ticketService = new TicketService();
 
 // Create a new ticket
-router.post('/create', async (req, res) => {
+router.post('/create', RequireAdmin, async (req, res) => {
     try {
         const result = await ticketService.create(req);
         res.json(result);

@@ -5,15 +5,6 @@ class BookingService {
         this.bookingsdao = new BookingsDAO();
     }
 
-    // Create a new booking
-    async create(req) {
-        const result = await this.bookingsdao.create(req);
-        if (!result.success) {
-            return result;
-        }
-        return result;
-    }
-
     //book an event ticket
     async bookEvent(req) {
         try {

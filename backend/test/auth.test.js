@@ -1,7 +1,7 @@
 const { test, after } = require('node:test');
 const assert = require('node:assert/strict');
 const request = require('supertest');
-const { useTempDatabase } = require('./helpers');
+const { useTempDatabase, loginAs } = require('./helpers');
 
 useTempDatabase();
 const app = require('../app');
@@ -30,6 +30,8 @@ test('responses never contain password hashes', { timeout: 2000 }, async () => {
     const login = await agent.post('/user/login').send({ username: 'carol', password: 'carol-password' }).expect(200);
     assert.deepEqual(login.body, { success: true, username: 'carol' });
 
-    const users = await agent.get('/user/getAll');
+    const admin = await loginAs(app, connection, 'auditor', { admin: true });
+    const users = await admin.get('/user/getAll').expect(200);
+    assert.ok(users.body.some((u) => u.username === 'carol'));
     assert.doesNotMatch(JSON.stringify(users.body), /password|\$2b\$/);
 });

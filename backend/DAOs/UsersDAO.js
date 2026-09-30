@@ -4,11 +4,11 @@ const createresponse = require('../Utilities/createResponse')
 class UsersDAO {
     constructor() {}
 
-    // Create a new user
-    async create(req) {
+    // Create a new (non-admin) user
+    async create(username, passwordHash) {
         return new Promise((resolve, reject) => {
-            connection.run('INSERT INTO users (username, password, isAdmin) VALUES (?,?,?)', 
-                [req.body.username, req.body.password, req.body.isAdmin], 
+            connection.run('INSERT INTO users (username, password, isAdmin) VALUES (?,?,0)', 
+                [username, passwordHash], 
                 (err, result) => {
                     if (err) {
                         reject(createresponse(false, 'DB error', err))

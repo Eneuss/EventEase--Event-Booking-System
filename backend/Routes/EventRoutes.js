@@ -2,11 +2,12 @@ const express = require('express');
 const router = express.Router();
 const EventService = require('../Services/EventService');
 const path = require('path');
+const RequireAdmin = require('../Middleware/RequireAdmin');
 
 const eventService = new EventService();
 
 // Create a new event
-router.post('/create', async (req, res) => {
+router.post('/create', RequireAdmin, async (req, res) => {
     try {
         const result = await eventService.create(req);
         res.json(result);
