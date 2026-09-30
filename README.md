@@ -2,7 +2,6 @@
 
 A full-stack web app for finding events in a city, seeing them on an interactive map, and booking tickets.
 
-[![CI](https://github.com/Eneuss/EventEase--Event-Booking-System/actions/workflows/ci.yml/badge.svg)](https://github.com/Eneuss/EventEase--Event-Booking-System/actions/workflows/ci.yml)
 ![JavaScript](https://img.shields.io/badge/language-JavaScript-f7df1e)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
@@ -30,13 +29,13 @@ A full-stack web app for finding events in a city, seeing them on an interactive
 - **Backend:** Node.js, Express 4, express-session, bcrypt
 - **Database:** SQLite
 - **Testing:** node:test + supertest (API), Vitest + Testing Library (UI)
-- **Tooling:** ESLint, Docker Compose (nginx), GitHub Actions
+- **Tooling:** ESLint, Docker Compose (nginx)
 
 ## Highlights
 
 - **No overselling under concurrent load.** A booking is one conditional `UPDATE` (only if enough tickets remain and the event hasn't happened yet) plus an `INSERT`, run as a single SQLite transaction. A test fires 20 simultaneous requests at 5 remaining tickets and checks that exactly 5 succeed.
 - **Server-side authorisation.** Sessions live in httpOnly cookies and passwords are hashed with bcrypt. The server takes the booking's user from the session, never from the request, and restricts admin-only endpoints by role. Repeated failed logins are rate-limited.
-- **Layered, tested API.** Routes → services → DAOs keep HTTP, business rules and SQL apart. 44 API tests run against freshly seeded databases, and CI runs everything on Node 22 and 24.
+- **Layered, tested API.** Routes → services → DAOs keep HTTP, business rules and SQL apart. 44 API tests run against freshly seeded databases.
 - **One-command setup.** `docker compose up` builds the React app, serves it with nginx, proxies the API behind the same origin, and seeds a demo database on first start.
 
 ---
@@ -180,8 +179,7 @@ flowchart LR
 │   │   └── utils/             # Date formatting
 │   ├── nginx.conf             # Serves the build and proxies the API (Docker)
 │   └── Dockerfile
-├── docker-compose.yml
-└── .github/workflows/ci.yml   # Lint, test, build on Node 22 and 24; docker compose build
+└── docker-compose.yml
 ```
 
 ## Technical decisions and trade-offs
@@ -206,7 +204,6 @@ flowchart LR
   - configuration (the production secret check actually starts the server)
   - schema/seed idempotency
 - **Frontend: 11 tests** (Vitest + Testing Library, jsdom). Nine cover `BookingForm`: ticket options with prices and sold-out state, a successful booking, server error messages, network failure, the logged-out case and input validation. Two cover date formatting.
-- **CI** (`.github/workflows/ci.yml`) runs lint and tests for both packages on Node 22 and 24, builds the frontend, and runs `docker compose build`.
 
 ## Limitations and future improvements
 
