@@ -1,5 +1,5 @@
 const Database = require("sqlite3")
-const connection = new Database.Database("eventease.db", (err)=>{
+const connection = new Database.Database(process.env.DB_PATH || "eventease.db", (err)=>{
     if(err)
         {
            return 

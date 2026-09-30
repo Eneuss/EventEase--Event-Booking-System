@@ -19,8 +19,6 @@ app.use(session({
     }
   }));
 
-const PORT = 3000;
-
 app.use(cors({
     origin: 'http://localhost:5173',
     credentials: true
@@ -38,6 +36,4 @@ app.use('/ticket', TicketRouter);
 // Booking Routes
 app.use('/booking', BookingRouter);
 
-app.listen(PORT, () => {
-    console.log(`Listening on port : ${PORT}`);
-});
+module.exports = app;
