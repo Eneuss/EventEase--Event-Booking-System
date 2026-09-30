@@ -5,6 +5,15 @@ const ticketsDao = {
         return all('SELECT * FROM tickets');
     },
 
+    findByEventIds(eventIds) {
+        if (eventIds.length === 0) return Promise.resolve([]);
+        const placeholders = eventIds.map(() => '?').join(', ');
+        return all(
+            `SELECT eventID, ticketType, price, availability FROM tickets WHERE eventID IN (${placeholders}) ORDER BY id`,
+            eventIds
+        );
+    },
+
     // Availability and price of the first ticket type still available for the named event.
     findAvailableByEventName(name) {
         return get(

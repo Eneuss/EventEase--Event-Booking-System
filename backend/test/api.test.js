@@ -22,6 +22,15 @@ describe('events', () => {
         assert.deepEqual(res.body, []);
     });
 
+    test('search results include each event\'s ticket types, prices and availability', async () => {
+        const res = await request(app).get('/event/London').expect(200);
+        const rock = res.body.find((e) => e.name === 'Rock Concert');
+        assert.deepEqual(rock.tickets.map((t) => t.ticketType), ['General', 'VIP', 'Student']);
+        for (const ticket of rock.tickets) {
+            assert.deepEqual(Object.keys(ticket).sort(), ['availability', 'price', 'ticketType']);
+        }
+    });
+
     test('all events are listed', async () => {
         const res = await request(app).get('/event/getAll').expect(200);
         assert.ok(res.body.length >= 5);
