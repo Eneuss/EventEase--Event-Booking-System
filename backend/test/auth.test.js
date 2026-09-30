@@ -23,3 +23,13 @@ test('login with a wrong password returns 401 with the same message', { timeout:
     assert.equal(wrong.status, 401);
     assert.equal(wrong.body.message, unknown.body.message);
 });
+
+test('responses never contain password hashes', { timeout: 2000 }, async () => {
+    const agent = request.agent(app);
+    await agent.post('/user/signup').send({ username: 'carol', password: 'carol-password', isAdmin: 0 });
+    const login = await agent.post('/user/login').send({ username: 'carol', password: 'carol-password' }).expect(200);
+    assert.deepEqual(login.body, { success: true, username: 'carol' });
+
+    const users = await agent.get('/user/getAll');
+    assert.doesNotMatch(JSON.stringify(users.body), /password|\$2b\$/);
+});

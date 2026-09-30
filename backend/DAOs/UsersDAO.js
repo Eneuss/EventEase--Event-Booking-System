@@ -21,7 +21,7 @@ class UsersDAO {
     // Retrieve all users
     async retrieveAll() {
         return new Promise((resolve, reject) => {
-            connection.all('SELECT * FROM users', [], (err, result) => {
+            connection.all('SELECT id, username, isAdmin FROM users', [], (err, result) => {
                 if (err) {
                     reject(createresponse(false, 'DB error', err))
                 }
