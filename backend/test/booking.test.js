@@ -60,3 +60,17 @@ test('a successful booking returns its id', { timeout: 2000 }, async () => {
     assert.equal(res.body.success, true);
     assert.equal(typeof res.body.bookingId, 'number');
 });
+
+test('quantity and eventID must be positive integers', { timeout: 2000 }, async () => {
+    const agent = await loggedInAgent('ivan');
+    const [{ availability: before }] = await query(connection, "SELECT availability FROM tickets WHERE eventID = 1 AND ticketType = 'General'");
+    for (const body of [
+        { eventID: 1, ticketType: 'General', quantity: -5 },
+        { eventID: 1, ticketType: 'General', quantity: 1.5 },
+        { eventID: 1.5, ticketType: 'General', quantity: 1 },
+    ]) {
+        await agent.post('/booking/ticketing').send(body).expect(400);
+    }
+    const [{ availability: after }] = await query(connection, "SELECT availability FROM tickets WHERE eventID = 1 AND ticketType = 'General'");
+    assert.equal(after, before);
+});

@@ -13,9 +13,9 @@ router.post('/ticketing', SessionAuth, async (req, res) => {
     const { eventID, ticketType, quantity } = req.body;
 
     //input validation for security measures
-    if (!eventID || typeof eventID !== 'number' ||
+    if (!Number.isInteger(eventID) || eventID < 1 ||
       !ticketType || typeof ticketType !== 'string' ||
-      !quantity || typeof quantity !== 'number') {
+      !Number.isInteger(quantity) || quantity < 1) {
     return res.status(400).json({ success: false, message: 'Invalid booking input.' });
     }
 
