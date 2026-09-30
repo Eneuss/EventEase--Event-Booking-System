@@ -6,11 +6,16 @@ const eventRoutes = require('./routes/eventRoutes');
 const ticketRoutes = require('./routes/ticketRoutes');
 const bookingRoutes = require('./routes/bookingRoutes');
 
+const config = loadConfig();
 const app = express();
+
+if (config.trustProxy) {
+    app.set('trust proxy', 1);
+}
 
 app.use(express.json());
 app.use(session({
-    secret: loadConfig().sessionSecret,
+    secret: config.sessionSecret,
     resave: false,
     saveUninitialized: false,
     cookie: {

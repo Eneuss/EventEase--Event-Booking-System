@@ -11,6 +11,9 @@ function loadConfig(env = process.env) {
         isProduction,
         sessionSecret: env.SESSION_SECRET || DEV_SESSION_SECRET,
         usingDevSecret: !env.SESSION_SECRET,
+        // Set TRUST_PROXY=1 when running behind a reverse proxy (e.g. nginx in Docker Compose)
+        // so the rate limiter sees the client's IP instead of the proxy's.
+        trustProxy: env.TRUST_PROXY === '1',
     };
 }
 

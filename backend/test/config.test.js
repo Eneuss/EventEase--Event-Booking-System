@@ -16,6 +16,11 @@ test('development mode falls back to a clearly marked insecure secret', () => {
     assert.equal(config.usingDevSecret, true);
 });
 
+test('trusting a reverse proxy is opt-in', () => {
+    assert.equal(loadConfig({}).trustProxy, false);
+    assert.equal(loadConfig({ TRUST_PROXY: '1' }).trustProxy, true);
+});
+
 test('PORT is configurable', () => {
     assert.equal(loadConfig({}).port, 3000);
     assert.equal(loadConfig({ PORT: '4000' }).port, 4000);

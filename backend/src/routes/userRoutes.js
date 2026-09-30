@@ -1,6 +1,7 @@
 const express = require('express');
 const userService = require('../services/userService');
 const requireAdmin = require('../middleware/requireAdmin');
+const loginRateLimit = require('../middleware/loginRateLimit');
 const asyncHandler = require('../utils/asyncHandler');
 const { isNonEmptyString } = require('../utils/validation');
 
@@ -18,7 +19,7 @@ router.post('/signup', asyncHandler(async (req, res) => {
     res.json({ success: true, username });
 }));
 
-router.post('/login', asyncHandler(async (req, res) => {
+router.post('/login', loginRateLimit, asyncHandler(async (req, res) => {
     const { username, password } = req.body;
     if (!isNonEmptyString(username) || !isNonEmptyString(password)) {
         return res.status(400).json({ success: false, message: 'Invalid username or password input.' });
