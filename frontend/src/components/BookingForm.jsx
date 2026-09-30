@@ -44,7 +44,7 @@ function BookingForm({ eventId, loggedInUser, compact = false }) {
   const separator = compact ? <br /> : ' ';
 
   return (
-    <form className="booking-form" onSubmit={handleSubmit} style={compact ? { marginTop: '10px' } : undefined}>
+    <form className="booking-form" onSubmit={handleSubmit} noValidate style={compact ? { marginTop: '10px' } : undefined}>
       <label>
         {compact ? 'Type:' : 'Ticket Type:'}
         <select value={ticketType} onChange={(e) => setTicketType(e.target.value)}>
