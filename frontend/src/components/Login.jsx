@@ -1,40 +1,18 @@
-import React, { useState, useEffect } from 'react';
+import { useState } from 'react';
+import { login, logout } from '../api.js';
 
-function Login({ onLoginSuccess }) {
+// Login form, or the logged-in user's name with a logout button.
+// The session itself is restored by App on page load.
+function Login({ loggedInUser, onLoginChange }) {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  const [loggedInUser, setLoggedInUser] = useState(null);
   const [error, setError] = useState(null);
 
-  //check login state while reloading the page
-  useEffect(() => {
-    fetch('/user/session', {
-      credentials: 'include'
-    })
-      .then(res => res.json())
-      .then(data => {
-        if (data.loggedIn) {
-          setLoggedInUser(data.username);
-          onLoginSuccess(data.username);
-        }
-      });
-  }, []);
-
-  //enables the login to work
   const handleLogin = async () => {
     try {
-      const res = await fetch('/user/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({ username, password })
-      });
-
-      const data = await res.json();
-
-      if (res.ok && data.success) {
-        setLoggedInUser(username);
-        onLoginSuccess(username);
+      const { ok, data } = await login(username, password);
+      if (ok && data.success) {
+        onLoginChange(data.username);
         setUsername('');
         setPassword('');
         setError(null);
@@ -47,14 +25,9 @@ function Login({ onLoginSuccess }) {
     }
   };
 
-  //used to process the logout of the user
   const handleLogout = async () => {
-    await fetch('/user/logout', {
-      method: 'POST',
-      credentials: 'include'
-    });
-    setLoggedInUser(null);
-    onLoginSuccess(null);
+    await logout();
+    onLoginChange(null);
   };
 
   return (

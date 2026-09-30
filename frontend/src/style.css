@@ -74,3 +74,10 @@ h1 {
     text-align: right;
   }
   
+.error {
+  color: #b00020;
+}
+
+.success {
+  color: #1b7f3b;
+}
