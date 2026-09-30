@@ -13,6 +13,12 @@ function mockFetchResponse(status, body) {
   return fetchMock;
 }
 
+const tickets = [
+  { ticketType: 'General', price: 50, availability: 100 },
+  { ticketType: 'VIP', price: 120, availability: 5 },
+  { ticketType: 'Student', price: 35, availability: 0 },
+];
+
 async function fillAndSubmit(user, { type = 'VIP', quantity = '2' } = {}) {
   if (type) await user.selectOptions(screen.getByLabelText(/ticket type/i), type);
   if (quantity) await user.type(screen.getByLabelText(/quantity/i), quantity);
@@ -29,10 +35,26 @@ describe('BookingForm', () => {
     vi.restoreAllMocks();
   });
 
-  it('books tickets, shows a success message and resets the form', async () => {
+  it('lists the event\'s ticket types with price and availability, disabling sold-out types', () => {
+    render(<BookingForm eventId={1} tickets={tickets} loggedInUser="demo" />);
+
+    expect(screen.getByRole('option', { name: 'General – £50.00 (100 left)' })).toBeEnabled();
+    expect(screen.getByRole('option', { name: 'VIP – £120.00 (5 left)' })).toBeEnabled();
+    expect(screen.getByRole('option', { name: 'Student – £35.00 (sold out)' })).toBeDisabled();
+  });
+
+  it('shows a note instead of the form when an event has no tickets', () => {
+    render(<BookingForm eventId={1} tickets={[]} loggedInUser="demo" />);
+
+    expect(screen.getByText('No tickets available.')).toBeInTheDocument();
+    expect(screen.queryByRole('button')).not.toBeInTheDocument();
+  });
+
+  it('books tickets, shows a success message, resets the form and notifies the parent', async () => {
     const fetchMock = mockFetchResponse(200, { success: true, bookingId: 7 });
+    const onBooked = vi.fn();
     const user = userEvent.setup();
-    render(<BookingForm eventId={1} loggedInUser="demo" />);
+    render(<BookingForm eventId={1} tickets={tickets} loggedInUser="demo" onBooked={onBooked} />);
 
     await fillAndSubmit(user);
 
@@ -44,12 +66,13 @@ describe('BookingForm', () => {
     expect(JSON.parse(options.body)).toEqual({ eventID: 1, ticketType: 'VIP', quantity: 2 });
     expect(screen.getByLabelText(/ticket type/i)).toHaveValue('');
     expect(screen.getByLabelText(/quantity/i)).toHaveValue(null);
+    expect(onBooked).toHaveBeenCalledOnce();
   });
 
   it('shows the error message returned by the server', async () => {
     mockFetchResponse(409, { success: false, message: 'This ticket type is sold out or does not have enough availability.' });
     const user = userEvent.setup();
-    render(<BookingForm eventId={1} loggedInUser="demo" />);
+    render(<BookingForm eventId={1} tickets={tickets} loggedInUser="demo" />);
 
     await fillAndSubmit(user);
 
@@ -61,7 +84,7 @@ describe('BookingForm', () => {
   it('shows a message when the server cannot be reached', async () => {
     vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new TypeError('Failed to fetch')));
     const user = userEvent.setup();
-    render(<BookingForm eventId={1} loggedInUser="demo" />);
+    render(<BookingForm eventId={1} tickets={tickets} loggedInUser="demo" />);
 
     await fillAndSubmit(user);
 
@@ -71,7 +94,7 @@ describe('BookingForm', () => {
   it('asks logged-out users to log in without calling the API', async () => {
     const fetchMock = mockFetchResponse(200, {});
     const user = userEvent.setup();
-    render(<BookingForm eventId={1} loggedInUser={null} />);
+    render(<BookingForm eventId={1} tickets={tickets} loggedInUser={null} />);
 
     await fillAndSubmit(user);
 
@@ -86,7 +109,7 @@ describe('BookingForm', () => {
   ])('validates input: %s', async (_label, input) => {
     const fetchMock = mockFetchResponse(200, {});
     const user = userEvent.setup();
-    render(<BookingForm eventId={1} loggedInUser="demo" />);
+    render(<BookingForm eventId={1} tickets={tickets} loggedInUser="demo" />);
 
     await fillAndSubmit(user, input);
 

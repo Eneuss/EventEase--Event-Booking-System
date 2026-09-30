@@ -16,7 +16,7 @@ function EventSearch({ onResults }) {
       if (!ok || !Array.isArray(data)) {
         throw new Error(`Unexpected response: ${JSON.stringify(data)}`);
       }
-      onResults(data);
+      onResults(data, location);
       setError(null);
     } catch (err) {
       console.error('Error fetching events:', err);

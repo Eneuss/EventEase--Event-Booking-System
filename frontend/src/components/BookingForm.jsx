@@ -1,11 +1,17 @@
 import { useState } from 'react';
 import { bookTicket } from '../api.js';
 
-const TICKET_TYPES = ['General', 'VIP', 'Student'];
+const formatPrice = new Intl.NumberFormat('en-GB', { style: 'currency', currency: 'GBP' }).format;
+
+function ticketLabel({ ticketType, price, availability }) {
+  const stock = availability > 0 ? `${availability} left` : 'sold out';
+  return `${ticketType} – ${formatPrice(price)} (${stock})`;
+}
 
 // Ticket type + quantity form used both in the event list and in the map popups.
-// `compact` switches to the shorter labels used inside map popups.
-function BookingForm({ eventId, loggedInUser, compact = false }) {
+// `tickets` are the event's ticket types from the API; `compact` switches to the shorter popup labels.
+// `onBooked` is called after a successful booking so the caller can refresh availability.
+function BookingForm({ eventId, tickets = [], loggedInUser, compact = false, onBooked }) {
   const [ticketType, setTicketType] = useState('');
   const [quantity, setQuantity] = useState('');
   const [message, setMessage] = useState(null); // { type: 'success' | 'error', text }
@@ -30,6 +36,7 @@ function BookingForm({ eventId, loggedInUser, compact = false }) {
         setMessage({ type: 'success', text: 'Booking successful!' });
         setTicketType('');
         setQuantity('');
+        onBooked?.();
       } else {
         setMessage({ type: 'error', text: data.message || 'Booking failed.' });
       }
@@ -41,6 +48,10 @@ function BookingForm({ eventId, loggedInUser, compact = false }) {
     }
   };
 
+  if (tickets.length === 0) {
+    return <p>No tickets available.</p>;
+  }
+
   const separator = compact ? <br /> : ' ';
 
   return (
@@ -49,8 +60,10 @@ function BookingForm({ eventId, loggedInUser, compact = false }) {
         {compact ? 'Type:' : 'Ticket Type:'}
         <select value={ticketType} onChange={(e) => setTicketType(e.target.value)}>
           <option value="">{compact ? 'Select' : '-- Select Type --'}</option>
-          {TICKET_TYPES.map((type) => (
-            <option key={type} value={type}>{type}</option>
+          {tickets.map((ticket) => (
+            <option key={ticket.ticketType} value={ticket.ticketType} disabled={ticket.availability === 0}>
+              {ticketLabel(ticket)}
+            </option>
           ))}
         </select>
       </label>

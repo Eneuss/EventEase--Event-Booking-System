@@ -1,6 +1,6 @@
 import BookingForm from './BookingForm.jsx';
 
-function EventList({ events, loggedInUser }) {
+function EventList({ events, loggedInUser, onBooked }) {
   if (!Array.isArray(events) || events.length === 0) {
     return <p>No results found.</p>;
   }
@@ -14,7 +14,7 @@ function EventList({ events, loggedInUser }) {
           <p><strong>Location:</strong> {event.location}</p>
           <p><strong>Date:</strong> {event.date}</p>
           <p>{event.description}</p>
-          <BookingForm eventId={event.id} loggedInUser={loggedInUser} />
+          <BookingForm eventId={event.id} tickets={event.tickets} loggedInUser={loggedInUser} onBooked={onBooked} />
         </div>
       ))}
     </div>

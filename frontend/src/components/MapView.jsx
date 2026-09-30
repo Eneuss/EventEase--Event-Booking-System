@@ -21,7 +21,7 @@ function RecenterMap({ lat, lon }) {
   return null;
 }
 
-function MapView({ events, loggedInUser }) {
+function MapView({ events, loggedInUser, onBooked }) {
   if (!Array.isArray(events) || events.length === 0) return null;
 
   // Center the map on the first result.
@@ -39,7 +39,7 @@ function MapView({ events, loggedInUser }) {
           <Popup>
             <strong>{event.name}</strong><br />
             {event.description}
-            <BookingForm eventId={event.id} loggedInUser={loggedInUser} compact />
+            <BookingForm eventId={event.id} tickets={event.tickets} loggedInUser={loggedInUser} onBooked={onBooked} compact />
           </Popup>
         </Marker>
       ))}
