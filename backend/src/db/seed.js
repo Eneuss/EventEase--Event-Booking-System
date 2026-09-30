@@ -1,4 +1,5 @@
-const [hashPassword] = require('../Utilities/bcryptUtility');
+const { run } = require('./connection');
+const { hashPassword } = require('../utils/password');
 
 // Demo data for local development. Event dates are relative to the seeding day,
 // so the demo always has upcoming events, plus one past event to show that it cannot be booked.
@@ -31,24 +32,19 @@ const users = [
     { username: 'admin', password: 'admin1234', isAdmin: 1 },
 ];
 
-function run(connection, sql, params) {
-    return new Promise((resolve, reject) =>
-        connection.run(sql, params, function (err) { return err ? reject(err) : resolve(this); }));
-}
-
-async function seed(connection) {
+async function seed() {
     for (const event of events) {
-        const { lastID: eventID } = await run(connection,
+        const { lastID: eventID } = await run(
             'INSERT INTO events (name, category, location, date, lon, lat, description) VALUES (?, ?, ?, ?, ?, ?, ?)',
             [event.name, event.category, event.location, isoDateFromToday(event.days), event.lon, event.lat, event.description]);
         for (const [ticketType, price, availability] of event.tickets) {
-            await run(connection,
+            await run(
                 'INSERT INTO tickets (eventID, ticketType, price, availability) VALUES (?, ?, ?, ?)',
                 [eventID, ticketType, price, availability]);
         }
     }
     for (const user of users) {
-        await run(connection, 'INSERT INTO users (username, password, isAdmin) VALUES (?, ?, ?)',
+        await run('INSERT INTO users (username, password, isAdmin) VALUES (?, ?, ?)',
             [user.username, await hashPassword(user.password), user.isAdmin]);
     }
 }

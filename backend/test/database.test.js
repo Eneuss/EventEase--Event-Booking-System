@@ -5,10 +5,10 @@ const request = require('supertest');
 const { useTempDatabase, setupDatabase, query } = require('./helpers');
 
 useTempDatabase();
-const app = require('../app');
-const connection = require('../DatabaseConnection/SQLCon');
-const initDatabase = require('../DatabaseConnection/init');
-const { resolveDbPath } = require('../DatabaseConnection/paths');
+const app = require('../src/app');
+const { connection } = require('../src/db/connection');
+const initDatabase = require('../src/db/init');
+const { resolveDbPath } = require('../src/db/paths');
 
 setupDatabase({ before, after }, connection);
 
@@ -19,7 +19,7 @@ test('relative DB paths resolve against the backend folder, not the working dire
 
 test('initialising twice does not duplicate the seed data', async () => {
     const [{ before: count }] = await query(connection, 'SELECT COUNT(*) AS before FROM events');
-    await initDatabase(connection);
+    await initDatabase();
     const [{ after: again }] = await query(connection, 'SELECT COUNT(*) AS after FROM events');
     assert.equal(again, count);
 });

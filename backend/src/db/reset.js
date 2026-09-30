@@ -7,10 +7,10 @@ if (dbPath !== ':memory:') {
     fs.rmSync(dbPath, { force: true });
 }
 
-const connection = require('./SQLCon');
+const { connection } = require('./connection');
 const initDatabase = require('./init');
 
-initDatabase(connection)
+initDatabase()
     .then(() => console.log(`Reset database at ${dbPath}`))
     .catch((err) => {
         console.error(err);

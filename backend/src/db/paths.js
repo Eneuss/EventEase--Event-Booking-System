@@ -1,6 +1,6 @@
 const path = require('node:path');
 
-const backendRoot = path.join(__dirname, '..');
+const backendRoot = path.join(__dirname, '..', '..');
 
 // Resolve relative paths against the backend folder so the server works from any working directory.
 function resolveDbPath(dbPath = process.env.DB_PATH) {

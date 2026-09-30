@@ -4,8 +4,8 @@ const request = require('supertest');
 const { useTempDatabase, setupDatabase, loginAs } = require('./helpers');
 
 useTempDatabase();
-const app = require('../app');
-const connection = require('../DatabaseConnection/SQLCon');
+const app = require('../src/app');
+const { connection } = require('../src/db/connection');
 
 setupDatabase({ before, after }, connection);
 

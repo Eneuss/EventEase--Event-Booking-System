@@ -12,10 +12,9 @@ if (config.usingDevSecret) {
 }
 
 const app = require('./app');
-const connection = require('./DatabaseConnection/SQLCon');
-const initDatabase = require('./DatabaseConnection/init');
+const initDatabase = require('./db/init');
 
-initDatabase(connection)
+initDatabase()
     .then(() => {
         app.listen(config.port, () => {
             console.log(`Listening on port : ${config.port}`);

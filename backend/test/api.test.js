@@ -4,8 +4,8 @@ const request = require('supertest');
 const { useTempDatabase, setupDatabase } = require('./helpers');
 
 useTempDatabase();
-const app = require('../app');
-const connection = require('../DatabaseConnection/SQLCon');
+const app = require('../src/app');
+const { connection } = require('../src/db/connection');
 
 setupDatabase({ before, after }, connection);
 
@@ -20,6 +20,22 @@ describe('events', () => {
     test('search for an unknown location returns an empty list', async () => {
         const res = await request(app).get('/event/Atlantis').expect(200);
         assert.deepEqual(res.body, []);
+    });
+
+    test('all events are listed', async () => {
+        const res = await request(app).get('/event/getAll').expect(200);
+        assert.ok(res.body.length >= 5);
+    });
+
+    test('availability and price can be looked up by event name', async () => {
+        const res = await request(app).get('/ticket/Rock%20Concert').expect(200);
+        assert.equal(typeof res.body.availability, 'number');
+        assert.equal(typeof res.body.price, 'number');
+    });
+
+    test('unknown routes return a JSON 404', async () => {
+        const res = await request(app).get('/nope').expect(404);
+        assert.equal(res.body.success, false);
     });
 });
 

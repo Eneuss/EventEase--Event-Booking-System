@@ -12,8 +12,8 @@ function useTempDatabase() {
 
 // Create the schema and demo data, then close the connection once the test file is done.
 function setupDatabase({ before, after }, connection) {
-    const initDatabase = require('../DatabaseConnection/init');
-    before(() => initDatabase(connection));
+    const initDatabase = require('../src/db/init');
+    before(() => initDatabase());
     after(() => connection.close());
 }
 

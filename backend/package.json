@@ -1,22 +1,18 @@
 {
-  "name": "webdevelopmentassesment",
+  "name": "eventease-backend",
   "version": "1.0.0",
-  "main": "server.js",
+  "private": true,
+  "description": "Express + SQLite REST API for the EventEase event booking app",
+  "main": "src/server.js",
   "scripts": {
-    "start": "node --env-file-if-exists=.env server.js",
+    "start": "node --env-file-if-exists=.env src/server.js",
     "test": "node --test \"test/**/*.test.js\"",
-    "db:reset": "node DatabaseConnection/reset.js"
+    "db:reset": "node src/db/reset.js"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "description": "",
   "dependencies": {
     "bcrypt": "^6.0.0",
-    "cors": "^2.8.5",
     "express": "^4.21.2",
     "express-session": "^1.18.1",
-    "path": "^0.12.7",
     "sqlite3": "^5.1.7"
   },
   "devDependencies": {
