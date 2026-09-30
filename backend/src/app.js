@@ -30,8 +30,8 @@ app.use((req, res) => {
 });
 
 // Last-resort error handler: log and answer with a generic 500 instead of crashing.
-// eslint-disable-next-line no-unused-vars
-app.use((err, req, res, next) => {
+// Express recognises error handlers by their four parameters, so _next must stay.
+app.use((err, req, res, _next) => {
     console.error(err);
     res.status(500).json({ success: false, message: 'Internal server error.' });
 });
