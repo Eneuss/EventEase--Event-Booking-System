@@ -4,7 +4,7 @@ const createResponse = require('../Utilities/createResponse');
 class BookingsDAO {
     constructor() {}
 
-    // Book tickets atomically. The availability check and decrement are a single conditional UPDATE,
+    // Book tickets atomically. The availability and event-date checks and the decrement are a single conditional UPDATE,
     // and the INSERT only runs if that UPDATE changed a row. The connection is in serialized mode and
     // all four statements are queued in the same tick, so no other request's statements can run in between.
     async bookEvent({ eventID, ticketType, username, quantity }) {
@@ -16,7 +16,8 @@ class BookingsDAO {
             connection.run('BEGIN IMMEDIATE');
             connection.run(
                 `UPDATE tickets SET availability = availability - ?
-                 WHERE eventID = ? AND ticketType = ? AND availability >= ?`,
+                 WHERE eventID = ? AND ticketType = ? AND availability >= ?
+                   AND eventID IN (SELECT id FROM events WHERE date >= date('now'))`,
                 [quantity, eventID, ticketType, quantity],
                 function (err) {
                     if (err) failure = err;
@@ -41,12 +42,17 @@ class BookingsDAO {
                 }
                 // Nothing was reserved: find out why, for a useful error message.
                 connection.get(
-                    'SELECT availability FROM tickets WHERE eventID = ? AND ticketType = ?',
+                    `SELECT t.availability, e.date < date('now') AS isPast
+                     FROM tickets t JOIN events e ON e.id = t.eventID
+                     WHERE t.eventID = ? AND t.ticketType = ?`,
                     [eventID, ticketType],
                     (err2, ticket) => {
                         if (err2) return reject(err2);
                         if (!ticket) {
                             return resolve({ success: false, status: 404, message: 'This ticket type does not exist for this event.' });
+                        }
+                        if (ticket.isPast) {
+                            return resolve({ success: false, status: 400, message: 'This event has already taken place.' });
                         }
                         resolve({ success: false, status: 409, message: 'This ticket type is sold out or does not have enough availability.' });
                     }

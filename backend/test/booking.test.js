@@ -74,3 +74,22 @@ test('quantity and eventID must be positive integers', { timeout: 2000 }, async 
     const [{ availability: after }] = await query(connection, "SELECT availability FROM tickets WHERE eventID = 1 AND ticketType = 'General'");
     assert.equal(after, before);
 });
+
+test('past events cannot be booked', { timeout: 2000 }, async () => {
+    const [past] = await query(connection, "SELECT id FROM events WHERE date < date('now')");
+    const [{ availability: before }] = await query(connection, 'SELECT availability FROM tickets WHERE eventID = ?', [past.id]);
+    const agent = await loggedInAgent('judy');
+
+    const res = await agent.post('/booking/ticketing').send({ eventID: past.id, ticketType: 'General', quantity: 1 });
+
+    assert.equal(res.status, 400);
+    assert.match(res.body.message, /already taken place/);
+    const [{ availability: after }] = await query(connection, 'SELECT availability FROM tickets WHERE eventID = ?', [past.id]);
+    assert.equal(after, before);
+});
+
+test('an event taking place today can still be booked', { timeout: 2000 }, async () => {
+    await query(connection, "UPDATE events SET date = date('now') WHERE id = 2");
+    const agent = await loggedInAgent('kate');
+    await agent.post('/booking/ticketing').send({ eventID: 2, ticketType: 'General', quantity: 1 }).expect(200);
+});
