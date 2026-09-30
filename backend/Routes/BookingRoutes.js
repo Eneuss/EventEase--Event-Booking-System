@@ -19,15 +19,17 @@ router.post('/create', async (req, res) => {
 // Create a new booking
 router.post('/ticketing', SessionAuth, async (req, res) => {
     //input validation
-    const { eventID, ticketType, username, quantity } = req.body;
+    const { eventID, ticketType, quantity } = req.body;
 
     //input validation for security measures
     if (!eventID || typeof eventID !== 'number' ||
       !ticketType || typeof ticketType !== 'string' ||
-      !quantity || typeof quantity !== 'number' ||
-      !username || typeof username !== 'string') {
+      !quantity || typeof quantity !== 'number') {
     return res.status(400).json({ success: false, message: 'Invalid booking input.' });
     }
+
+    // The booking always belongs to the logged-in user, whatever the client sends.
+    req.body.username = req.session.user;
 
     try {
         const result = await bookingService.bookEvent(req);
