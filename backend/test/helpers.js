@@ -3,13 +3,18 @@ const os = require('node:os');
 const path = require('node:path');
 const request = require('supertest');
 
-// Point the app at a throwaway copy of the database before it is loaded.
+// Point the app at a fresh, empty database file before it is loaded; it is seeded by setupDatabase().
 function useTempDatabase() {
     const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'eventease-test-'));
-    const dbPath = path.join(dir, 'eventease.db');
-    fs.copyFileSync(path.join(__dirname, '..', 'eventease.db'), dbPath);
-    process.env.DB_PATH = dbPath;
-    return dbPath;
+    process.env.DB_PATH = path.join(dir, 'eventease.db');
+    return process.env.DB_PATH;
+}
+
+// Create the schema and demo data, then close the connection once the test file is done.
+function setupDatabase({ before, after }, connection) {
+    const initDatabase = require('../DatabaseConnection/init');
+    before(() => initDatabase(connection));
+    after(() => connection.close());
 }
 
 function query(connection, sql, params = []) {
@@ -29,4 +34,4 @@ async function loginAs(app, connection, username, { admin = false } = {}) {
     return agent;
 }
 
-module.exports = { useTempDatabase, query, loginAs };
+module.exports = { useTempDatabase, setupDatabase, query, loginAs };

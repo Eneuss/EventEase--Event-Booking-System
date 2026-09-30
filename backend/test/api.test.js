@@ -1,14 +1,13 @@
-const { test, describe, after } = require('node:test');
+const { test, describe, before, after } = require('node:test');
 const assert = require('node:assert/strict');
 const request = require('supertest');
-const { useTempDatabase } = require('./helpers');
+const { useTempDatabase, setupDatabase } = require('./helpers');
 
 useTempDatabase();
 const app = require('../app');
 const connection = require('../DatabaseConnection/SQLCon');
 
-// The open SQLite handle would otherwise keep the test process alive.
-after(() => connection.close());
+setupDatabase({ before, after }, connection);
 
 describe('events', () => {
     test('search by location returns matching events', async () => {

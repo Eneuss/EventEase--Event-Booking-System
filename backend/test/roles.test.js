@@ -1,13 +1,13 @@
-const { test, after } = require('node:test');
+const { test, before, after } = require('node:test');
 const assert = require('node:assert/strict');
 const request = require('supertest');
-const { useTempDatabase, query, loginAs } = require('./helpers');
+const { useTempDatabase, setupDatabase, query, loginAs } = require('./helpers');
 
 useTempDatabase();
 const app = require('../app');
 const connection = require('../DatabaseConnection/SQLCon');
 
-after(() => connection.close());
+setupDatabase({ before, after }, connection);
 
 const newEvent = {
     name: 'Test Gig', category: 'Concert', location: 'Leeds', date: '2099-01-01',

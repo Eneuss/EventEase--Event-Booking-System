@@ -1,13 +1,13 @@
-const { test, after } = require('node:test');
+const { test, before, after } = require('node:test');
 const assert = require('node:assert/strict');
 const request = require('supertest');
-const { useTempDatabase, loginAs } = require('./helpers');
+const { useTempDatabase, setupDatabase, loginAs } = require('./helpers');
 
 useTempDatabase();
 const app = require('../app');
 const connection = require('../DatabaseConnection/SQLCon');
 
-after(() => connection.close());
+setupDatabase({ before, after }, connection);
 
 test('login with an unknown username returns 401 and the server keeps running', { timeout: 2000 }, async () => {
     const res = await request(app).post('/user/login').send({ username: 'ghost', password: 'whatever' });

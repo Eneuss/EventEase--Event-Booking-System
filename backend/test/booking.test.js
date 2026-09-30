@@ -1,12 +1,12 @@
-const { test, after } = require('node:test');
+const { test, before, after } = require('node:test');
 const assert = require('node:assert/strict');
-const { useTempDatabase, query, loginAs } = require('./helpers');
+const { useTempDatabase, setupDatabase, query, loginAs } = require('./helpers');
 
 useTempDatabase();
 const app = require('../app');
 const connection = require('../DatabaseConnection/SQLCon');
 
-after(() => connection.close());
+setupDatabase({ before, after }, connection);
 
 const loggedInAgent = (username) => loginAs(app, connection, username);
 
